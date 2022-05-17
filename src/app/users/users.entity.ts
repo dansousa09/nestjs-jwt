@@ -1,5 +1,7 @@
-import bcrypt from 'bcrypt';
+import { hashSync } from 'bcrypt';
+import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import { BeforeInsert, Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import { promisify } from 'util';
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -27,15 +29,4 @@ export class UserEntity {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date;
-
-  @BeforeInsert()
-  hashPassword() {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(this.password, salt); 
-    console.log(hash);
-    this.password = hash;
-  }
-
-  
-
 }

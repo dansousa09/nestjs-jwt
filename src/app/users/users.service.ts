@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
+import { hashSync } from 'bcrypt';
+import { FindOneOptions, Repository } from 'typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { UserEntity } from './users.entity'
@@ -27,7 +28,9 @@ export class UsersService {
   }
 
   async create(data: CreateUserDTO): Promise<UserEntity> {
-    await this.usersRepository.save(data);
+    const hash = hashSync(data.password, 10);
+    await this.usersRepository.save({ ...data, password: hash });
+
     const user = await this.usersRepository.findOneOrFail({
       where: { email: data.email },
       select: ['id', 'firstName', 'lastName', 'email', 'createdAt']
@@ -45,6 +48,4 @@ export class UsersService {
     const user = await this.usersRepository.findOneOrFail({ where: { id } });
     return await this.usersRepository.remove(user);
   }
-
-
 }
